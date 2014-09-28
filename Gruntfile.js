@@ -18,7 +18,7 @@ module.exports = function (grunt) {
                 options: {
                     beautify: true,
                     sourceMap: true,
-                    sourceMapName: 'sample/samplePack2.map',
+                    sourceMapName: 'sample/samplePack.map',
                     wrap:'app2',
                     selft:true
                 },

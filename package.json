@@ -23,7 +23,6 @@
         "modules"
     ],
     "devDependencies": {
-        "glob": "^4.0.5",
         "grunt": "latest",
         "grunt-contrib-concat": "latest",
         "grunt-contrib-copy": "latest",
