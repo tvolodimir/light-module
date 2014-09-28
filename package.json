@@ -1,10 +1,17 @@
 {
     "name": "light-module",
-    "homepage": "tvolodimir.github.io",
+    "homepage": "https://github.com/tvolodimir/light-module",
     "version": "0.0.1",
     "description": "module managing",
+    "license": "MIT",
     "author": {
-        "name": "tvolodimir"
+        "name": "tvolodimir",
+        "email": "tvolodimir@gmail.com",
+        "url":"tvolodimir.github.io"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/tvolodimir/light-module.git"
     },
     "main": "./ModulesTools/index",
     "dependencies": {
