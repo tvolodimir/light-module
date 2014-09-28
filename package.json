@@ -1,0 +1,25 @@
+{
+    "name": "light-module",
+    "homepage": "tvolodimir.github.io",
+    "version": "0.0.1",
+    "description": "module managing",
+    "author": {
+        "name": "tvolodimir"
+    },
+    "main": "./ModulesTools/index",
+    "dependencies": {
+        "glob": "^4.0.5",
+        "minimatch": "^1.0.0"
+    },
+    "keywords": [
+        "module manager",
+        "modules"
+    ],
+    "devDependencies": {
+        "glob": "^4.0.5",
+        "grunt": "latest",
+        "grunt-contrib-concat": "latest",
+        "grunt-contrib-copy": "latest",
+        "grunt-contrib-uglify": "latest"
+    }
+}
