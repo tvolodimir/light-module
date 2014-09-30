@@ -136,20 +136,9 @@ var buildManualOneRootNoDependency = function (rootModuleName, globPatternSearch
 
 /** injectModulesLinksToHtml **/
 
-var scriptInjectTemplate = '<script src="/*%ScriptPath%*/"></script>';
-var injectHtmlScripts = function (defines, order, htmls, htmlScriptPathResolver, cbResult) {
-    arrayAction(htmls, function (source, nextCb) {
-        var text = "\n";
-        var srcs = [];
-        for (var i = 0; i < order.length; i++) {
-            var src = defines[order[i]].src;
-            if (srcs.indexOf(src) == -1) {
-                srcs.push(src);
-                var s = htmlScriptPathResolver(source, src);
-                text += scriptInjectTemplate.replace('/*%ScriptPath%*/', s) + '\n';
-            }
-        }
-        replaceRangeInFile(source, '<!--ModulesStart-->', '<!--ModulesEnd-->', text, function (err) {
+var replaceContent = function (filesPath, startMark, endMark, contentBuilder, cbResult) {
+    arrayAction(filesPath, function (filePath, nextCb) {
+        replaceRangeInFile(filePath, startMark, endMark, contentBuilder(filePath), function (err) {
             if (err === undefined) {
                 nextCb();
             }
@@ -157,6 +146,34 @@ var injectHtmlScripts = function (defines, order, htmls, htmlScriptPathResolver,
                 cbResult(er);
             }
         });
+    }, cbResult);
+};
+var cleanModulesAtHtml = function (globPatternSearch, globOptions, cb) {
+    globArray(globPatternSearch, globOptions, function (er, files) {
+        if (er) {
+            cb(er);
+            return;
+        }
+        replaceContent(files, '<!--ModulesStart-->', '<!--ModulesEnd-->', function () {
+            return ""
+        }, cb);
+    });
+};
+var scriptInjectTemplate = '<script src="/*%ScriptPath%*/"></script>';
+var injectHtmlScripts = function (defines, order, htmlPaths, htmlScriptPathResolver, cbResult) {
+    replaceContent(htmlPaths, '<!--ModulesStart-->', '<!--ModulesEnd-->', function (htmlPath) {
+        var text = "\n";
+        var srcs = [];
+        for (var i = 0; i < order.length; i++) {
+            var src = defines[order[i]].src;
+            if (srcs.indexOf(src) == -1) {
+                srcs.push(src);
+                var s = htmlScriptPathResolver(htmlPath, src);
+                if (s)
+                    text += scriptInjectTemplate.replace('/*%ScriptPath%*/', s) + '\n';
+            }
+        }
+        return text;
     }, cbResult);
 };
 var injectModulesLinksToHtml = function (rootModuleName, globPatternSearch, globOptions, htmlScriptPathResolver, htmls, cb) {
@@ -275,3 +292,5 @@ exports.injectHtmlScripts = injectHtmlScripts;
 exports.injectModulesLinksToHtml = injectModulesLinksToHtml;
 exports.getOrderFileList = getOrderFileList;
 exports.copyUsedModules = copyUsedModules;
+exports.replaceContent = replaceContent;
+exports.cleanModulesAtHtml = cleanModulesAtHtml;

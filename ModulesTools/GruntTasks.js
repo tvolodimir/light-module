@@ -49,4 +49,16 @@ module.exports = function (grunt) {
                 done(err);
             });
     });
+
+    var cleanModulesAtHtml = moduleTools.cleanModulesAtHtml;
+
+    grunt.registerMultiTask('cleanModulesAtHtml', 'clean Modules At Html files', function () {
+        var data = this.data;
+        var done = this.async();
+        cleanModulesAtHtml(data.globPatternSearch, data.globOptions,
+            function (err, result) {
+                grunt.log.writeln('cleanModulesAtHtml', err, result);
+                done(err);
+            });
+    });
 };

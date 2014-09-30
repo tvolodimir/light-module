@@ -1,9 +1,6 @@
+var defineModule, getModule;
 (function () {
     "use strict";
-
-    var scope = (typeof window === 'undefined') ? exports : window;
-    if (scope.defineModule !== undefined && scope.getModule !== undefined) return;
-
     /**
      * Topological sorting (of a DAG) using modified non-recursive Post Order DFS
      * Graph traversal (Tree traversal)
@@ -114,6 +111,6 @@
         }
     };
 
-    scope.defineModule = modulesManager.define;
-    scope.getModule = modulesManager.getModule;
+    defineModule = modulesManager.define;
+    getModule = modulesManager.getModule;
 })();
