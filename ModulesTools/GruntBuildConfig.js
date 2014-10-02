@@ -12,7 +12,7 @@ module.exports = function (grunt, configApp) {
 
     var banner = configApp.banner;
     var meta = {
-        modulesManager: "./node_modules/light-module/ModulesTools/templates/modulesResolverForPack.js",
+        modulesManager: path.join(__dirname, '/templates/modulesResolverForPack.js'),
         rootModuleName: configApp.rootModuleName,
         modulesBase: configApp.modulesBase,
         modulesUsed: configApp.modulesUsed,
