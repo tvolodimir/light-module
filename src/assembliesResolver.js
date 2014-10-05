@@ -115,7 +115,7 @@
             throw new Error('[DomainManager] module "' + this.name + '.' + name + '" doesn\'t defined');
         }
         if (module.exports !== undefined) {
-            return module.exports;
+            return module.exports.exports;
         }
         var resultSort = topologicalSortingDAG([module], function (m) {
             if (m === undefined) return null;
@@ -143,7 +143,7 @@
                 order[i].assembly._buildModule(order[i].name);
             }
         }
-        return module.exports;
+        return module.exports.exports;
     };
     Assembly.prototype.defineModule = function (name, requires, factory) {
         if (this.modules[name] !== undefined) {
@@ -167,7 +167,9 @@
             r.push(this.findModuleExports(requires[i]));
         }
 
-        r.unshift(module.exports = {}, this.findModuleExportsBind);
+        var mm = {exports: {}};
+        module.exports = mm;
+        r.unshift(mm, this.findModuleExportsBind);
 
         var assemblyName = this.name;
         (function () {
@@ -203,7 +205,7 @@
         if (module.exports === undefined) {
             throw new Error('[DomainManager] for assembly "' + this.name + '" not loaded "' + name + '"');
         }
-        return module.exports;
+        return module.exports.exports;
     };
 
     var domain = {};

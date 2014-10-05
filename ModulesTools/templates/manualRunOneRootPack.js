@@ -2,12 +2,14 @@
     "use strict";
     var loaded = {};
     var getModule = function (name) {
-        return loaded[name];
+        return loaded[name].exports;
     };
     var invoke = function (name, requires, factory) {
-        var r = [loaded[name] = {}, getModule];
+        var mm = {exports: {}};
+        loaded[name] = mm;
+        var r = [mm, getModule];
         for (var i = 0; i < requires.length; i++) {
-            r.push(loaded[requires[i]]);
+            r.push(loaded[requires[i]].exports);
         }
         (function () {
             try {

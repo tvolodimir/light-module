@@ -49,7 +49,7 @@ var defineModule, getModule;
     modulesManager.defines = {};
     modulesManager.getModule = function (name) {
         if (modulesManager.loaded[name] !== undefined) {
-            return modulesManager.loaded[name];
+            return modulesManager.loaded[name].exports;
         }
         var order = topologicalSortingDAG([name], function (n) {
             var m = modulesManager.defines[n];
@@ -70,7 +70,7 @@ var defineModule, getModule;
             var module = modulesManager.defines[order[i]];
             modulesManager.invoke(module.name, module.requires, module.factory);
         }
-        return modulesManager.loaded[name];
+        return modulesManager.loaded[name].exports;
     };
     modulesManager.define = function (name, requires, factory) {
         if (modulesManager.defines[name] !== undefined) {
@@ -94,11 +94,15 @@ var defineModule, getModule;
                 throw new Error('[ModulesManager] module ' + name + ' require ' + requires[i]);
             }
             else {
-                r.push(m);
+                r.push(m.exports);
             }
         }
 
-        r.unshift(modulesManager.loaded[name] = {}, modulesManager.getModule);
+
+        var mm = {exports: {}};
+        modulesManager.loaded[name] = mm;
+
+        r.unshift(mm, modulesManager.getModule);
 
         console.log('[ModulesManager] loading ' + name);
         try {
