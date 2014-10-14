@@ -2,7 +2,22 @@ var path = require('path');
 
 var initGruntApps = [];
 
-module.exports = function (grunt, configApp) {
+var rebase = function(c, basePath){
+    c.modulesBase = path.join(basePath, c.modulesBase);
+    c.modulesUsed = path.join(basePath, c.modulesUsed);
+    c.modulesApp = path.join(basePath, c.modulesApp);
+    c.buildPath = path.join(basePath, c.buildPath);
+    c.dependenciesOrderDestination = path.join(basePath, c.dependenciesOrderDestination);
+    c.htmls.forEach(function(item, i){
+        c.htmls[i] = path.join(basePath, c.htmls[i]);
+    });
+};
+
+module.exports = function (grunt, configApp, basePath) {
+
+    if (basePath !== undefined) {
+        rebase(configApp, basePath);
+    }
 
     var appKey = configApp.appName;
 
@@ -18,6 +33,7 @@ module.exports = function (grunt, configApp) {
         modulesUsed: configApp.modulesUsed,
         modulesApp: configApp.modulesApp,
         buildPath: configApp.buildPath,
+        dependenciesOrderDestination: configApp.dependenciesOrderDestination,
         htmls: configApp.htmls
     };
 
@@ -36,6 +52,7 @@ module.exports = function (grunt, configApp) {
             meta.modulesApp + '**/*.js'
         ],
         preFiles: [meta.modulesManager],
+        destination: meta.dependenciesOrderDestination,
         order: null
     };
 
@@ -108,8 +125,14 @@ module.exports = function (grunt, configApp) {
 
     grunt.registerTask(appKey + '-sync', ['clean:' + appKey + '-used-modules', 'copyUsedModules:' + appKey]);
     grunt.registerTask(appKey + '-debug', ['cleanModulesAtHtml:' + appKey, 'injectModulesLinksToHtml:' + appKey]);
+    grunt.registerTask(appKey + '-order', ['getOrderFileList:' + appKey]);
     grunt.registerTask(appKey + '-pack', ['clean:' + appKey + '-pack', 'cleanModulesAtHtml:' + appKey, 'getOrderFileList:' + appKey, 'uglify:' + appKey]);
     grunt.registerTask(appKey + '-pack-clean', ['clean:' + appKey + '-pack']);
     grunt.registerTask(appKey + '-debug-clean', ['cleanModulesAtHtml:' + appKey]);
     grunt.registerTask(appKey + '-sync-clean', ['clean:' + appKey + '-used-modules']);
 };
+
+module.exports.buildSync = require('./GruntSync');
+module.exports.buildOrder = require('./GruntOrder');
+module.exports.buildInjectHtml = require('./GruntInjectHtml');
+module.exports.buildPack = require('./GruntPack');

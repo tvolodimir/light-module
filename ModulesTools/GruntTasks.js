@@ -16,6 +16,9 @@ module.exports = function (grunt) {
                     r.push(result[i]);
                 }
                 data.order = r;
+                if (data.destination) {
+                    grunt.file.write(data.destination, JSON.stringify({order: result}, null, 2));
+                }
                 grunt.config.set('meta.getOrderFileList.' + target, r);
                 grunt.log.writeln('getOrderFileList', err, r);
                 done(err);
@@ -47,7 +50,7 @@ module.exports = function (grunt) {
             function (err, result) {
                 grunt.log.writeln('injectModulesLinksToHtml', err, result);
                 done(err);
-            });
+            }, data.orderResultFile);
     });
 
     var cleanModulesAtHtml = moduleTools.cleanModulesAtHtml;
@@ -61,4 +64,25 @@ module.exports = function (grunt) {
                 done(err);
             });
     });
+
+    var getOrder = moduleTools.getOrder;
+
+    grunt.registerMultiTask('getOrder', 'Get ordered modules', function () {
+        var data = this.data,
+            target = this.target;
+        var done = this.async();
+        getOrder(data.globPatternSearch, data.globOptions, data.rootModuleName, data.pathBase,
+            function (err, result) {
+                if (result) {
+                    console.log(data);
+                    grunt.file.write(data.destination, JSON.stringify({
+                        order: result,
+                        rootModuleName: data.rootModuleName
+                    }, null, 2));
+                }
+                grunt.log.writeln('getOrderFileList', err, result);
+                done(err);
+            });
+    });
+
 };

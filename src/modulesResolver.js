@@ -111,10 +111,19 @@ var defineModule, getModule;
             })();
         }
         catch (error) {
-            throw new Error('[ModulesManager]', error['arguments'], error['stack']);
+            console.error('[ModulesManager]', error['arguments'], error['stack']);
+            throw error;
         }
     };
 
     defineModule = modulesManager.define;
     getModule = modulesManager.getModule;
 })();
+
+if (typeof exports !== 'undefined' &&
+    typeof require != 'undefined' &&
+    typeof global != 'undefined' &&
+    typeof __dirname!= "undefined") {
+    global.defineModule = defineModule;
+    global.getModule = getModule;
+}

@@ -5,7 +5,8 @@ var globArray = utils.globArray;
 var topologicalSortingDAG = utils.topologicalSortingDAG;
 var copyFiles = utils.copyFiles;
 
-var fs = require('fs'),
+var path = require('path'),
+    fs = require('fs'),
     minimatch = require("minimatch"),
     FilesSandboxAggregate = require('./FileSandbox.js').FilesSandboxAggregate;
 
@@ -43,6 +44,14 @@ var getDefineModulesByGlob = function (globPatternSearch, globOptions, cb) {
     });
 };
 
+var p = [
+    {
+        result: [
+            {name: 'a'}
+        ],
+        filePath: 'a.js'
+    }
+];
 var aggregateDefines = function (processedItems) {
     var allDefines = {};
     for (var j = 0; j < processedItems.length; j++) {
@@ -176,7 +185,40 @@ var injectHtmlScripts = function (defines, order, htmlPaths, htmlScriptPathResol
         return text;
     }, cbResult);
 };
-var injectModulesLinksToHtml = function (rootModuleName, globPatternSearch, globOptions, htmlScriptPathResolver, htmls, cb) {
+var injectHtmlScriptsByResultJson = function (orderResult, htmlPaths, htmlScriptPathResolver, cbResult) {
+    replaceContent(htmlPaths, '<!--ModulesStart-->', '<!--ModulesEnd-->', function (htmlPath) {
+        var text = "\n";
+        var srcs = [];
+        for (var i = 0; i < orderResult.order.length; i++) {
+            var src = orderResult.order[i].src;
+            if (srcs.indexOf(src) == -1) {
+                srcs.push(src);
+                var s = htmlScriptPathResolver(htmlPath, src);
+                if (s)
+                    text += scriptInjectTemplate.replace('/*%ScriptPath%*/', s) + '\n';
+            }
+        }
+        return text;
+    }, cbResult);
+};
+var injectModulesLinksToHtml = function (rootModuleName, globPatternSearch, globOptions, htmlScriptPathResolver, htmls, cb, orderResultFile) {
+    if (orderResultFile !== undefined) {
+        fs.readFile(orderResultFile, function (err, data) {
+            if (err) {
+                cb(err);
+                return;
+            }
+            injectHtmlScriptsByResultJson(JSON.parse(data), htmls, htmlScriptPathResolver, function (err, result) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+                cb(null, '[injectModulesLinksToHtml] done');
+            });
+        });
+
+        return;
+    }
     getDefineModulesByGlob(globPatternSearch, globOptions, function (er, processedItems) {
         if (er) {
             cb(er);
@@ -283,6 +325,35 @@ var getOrderFileList = function (globPatternSearch, globOptions, rootModuleName,
     });
 };
 
+var getOrder = function (globPatternSearch, globOptions, rootModuleName, pathBase, cbResult) {
+    getDefineModulesByGlob(globPatternSearch, globOptions, function (er, processedItems) {
+        if (er) {
+            cb(er);
+            return;
+        }
+
+        var defines = aggregateDefines(processedItems);
+
+        var order = topologicalSortingDAG([rootModuleName], function (name) {
+            var m = defines[name];
+            return m ? m.requires : null;
+        }, function (name) {
+            return false;
+        }, []);
+
+        var sources = [];
+        for (var i = 0; i < order.length; i++) {
+            sources.push({
+                src: pathBase == undefined ? defines[order[i]].src : path.relative(pathBase, defines[order[i]].src).replace(/\\/g, '/'),
+                name: order[i],
+                dependencies: defines[order[i]].requires
+            })
+        }
+
+        cbResult(null, sources);
+    });
+};
+
 exports.getDefineModules = getDefineModules;
 exports.getDefineModulesByGlob = getDefineModulesByGlob;
 exports.aggregateDefines = aggregateDefines;
@@ -294,3 +365,4 @@ exports.getOrderFileList = getOrderFileList;
 exports.copyUsedModules = copyUsedModules;
 exports.replaceContent = replaceContent;
 exports.cleanModulesAtHtml = cleanModulesAtHtml;
+exports.getOrder = getOrder;
