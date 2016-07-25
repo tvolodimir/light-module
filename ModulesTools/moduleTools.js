@@ -5,33 +5,12 @@ var globArray = utils.globArray;
 var topologicalSortingDAG = utils.topologicalSortingDAG;
 var copyFiles = utils.copyFiles;
 
+var getDefineModules = require('./ModulesTools').getDefineModules;
+
 var path = require('path'),
     fs = require('fs'),
-    minimatch = require("minimatch"),
-    FilesSandboxAggregate = require('./FileSandbox.js').FilesSandboxAggregate;
+    minimatch = require("minimatch");
 
-var defineModuleTemplate = "";
-var loadDefineModuleTemplate = function (cb) {
-    fs.readFile(__dirname + '/templates/defineModule.js', function (err, data) {
-        if (err) throw err;
-        defineModuleTemplate = data;
-        cb();
-    });
-};
-var getDefineModules = function (files, onResult) {
-    if (defineModuleTemplate == "") {
-        loadDefineModuleTemplate(function () {
-            new FilesSandboxAggregate().runFiles(files, function (content) {
-                return defineModuleTemplate.toString().replace('/*%%%*/', content);
-            }, onResult)
-        });
-    }
-    else {
-        new FilesSandboxAggregate().runFiles(files, function (content) {
-            return defineModuleTemplate.toString().replace('/*%%%*/', content);
-        }, onResult)
-    }
-};
 var getDefineModulesByGlob = function (globPatternSearch, globOptions, cb) {
     globArray(globPatternSearch, globOptions, function (er, files) {
         if (er) {
@@ -44,14 +23,6 @@ var getDefineModulesByGlob = function (globPatternSearch, globOptions, cb) {
     });
 };
 
-var p = [
-    {
-        result: [
-            {name: 'a'}
-        ],
-        filePath: 'a.js'
-    }
-];
 var aggregateDefines = function (processedItems) {
     var allDefines = {};
     for (var j = 0; j < processedItems.length; j++) {

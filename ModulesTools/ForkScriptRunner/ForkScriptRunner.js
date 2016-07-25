@@ -4,8 +4,6 @@ var child_process = require('child_process'),
 
 var defaultLimit = 300;
 
-exports.ForkScriptRunner = ForkScriptRunner;
-
 var nop = function () {
 };
 
@@ -99,3 +97,5 @@ ForkScriptRunner.prototype.isDead = function () {
     }
     return false;
 };
+
+module.exports = ForkScriptRunner;
